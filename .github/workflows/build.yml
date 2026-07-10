@@ -79,8 +79,6 @@ jobs:
         make -j"$(nproc)"
         make make install-strip
         cd ..
-        
-        mv $GITHUB_WORKSPACE/gdb-${{ env.GDB_VERSION }}/build/lib/*.so $GITHUB_WORKSPACE/gdb-${{ env.GDB_VERSION }}/build/bin
 
     - name: Verify binary
       run: |
