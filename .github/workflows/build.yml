@@ -39,9 +39,9 @@ jobs:
           sudo apt-get install -y build-essential
 
           # Install musl.cc prebuilt cross toolchains (includes gcc/g++)
-          wget -q https://musl.cc/x86_64-linux-musl-cross.tgz
+          wget https://musl.cc/x86_64-linux-musl-cross.tgz
           tar -xzf x86_64-linux-musl-cross.tgz
-          wget -q https://musl.cc/arm-linux-musleabihf-cross.tgz
+          wget https://musl.cc/arm-linux-musleabihf-cross.tgz
           tar -xzf arm-linux-musleabihf-cross.tgz
 
           echo "$GITHUB_WORKSPACE/x86_64-linux-musl-cross/bin" >> $GITHUB_PATH
