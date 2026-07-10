@@ -77,7 +77,7 @@ jobs:
           --prefix=$GITHUB_WORKSPACE/gdb-${{ env.GDB_VERSION }}/build
 
         make -j"$(nproc)"
-        make install
+        make make install-strip
         cd ..
         
         mv $GITHUB_WORKSPACE/gdb-${{ env.GDB_VERSION }}/build/lib/*.so $GITHUB_WORKSPACE/gdb-${{ env.GDB_VERSION }}/build/bin
