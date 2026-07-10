@@ -10,7 +10,7 @@ on:
 env:
   GDB_VERSION: "17.1"
   GMP_VERSION: "6.3.0"
-  MPFR_VERSON: "4.2.2"
+  MPFR_VERSION: "4.2.2"
 
 jobs:
   build:
@@ -56,14 +56,14 @@ jobs:
         make install
         cd ..
         
-        wget https://ftp.gnu.org/gnu/mpfr/mpfr-${{ env.MPFR_VERSON }}.tar.gz
-        tar -xf mpfr-${{ env.MPFR_VERSON }}.tar.gz
-        cd mpfr-${{ env.MPFR_VERSON }}
+        wget https://ftp.gnu.org/gnu/mpfr/mpfr-${{ env.MPFR_VERSION }}.tar.gz
+        tar -xf mpfr-${{ env.MPFR_VERSION }}.tar.gz
+        cd mpfr-${{ env.MPFR_VERSION }}
         ./configure \
             --host=${{ matrix.gdbserver_host }} \
             --enable-static --disable-shared \
             --with-gmp=$GITHUB_WORKSPACE/gmp-${{ env.GMP_VERSION }}/build  \
-            --prefix=$GITHUB_WORKSPACE/mpfr-${{ env.MPFR_VERSON }}/build
+            --prefix=$GITHUB_WORKSPACE/mpfr-${{ env.MPFR_VERSION }}/build
         make -j"$(nproc)"
         make install
         cd ..
@@ -72,11 +72,11 @@ jobs:
         tar -xf gdb-${{ env.GDB_VERSION }}.tar.gz
         cd gdb-${{ env.GDB_VERSION }}
 
-        ./configure \
+        CFLAGS="-static" CXXFLAGS="-static" LDFLAGS="-static" ./configure \
           --host=${{ matrix.gdbserver_host }} \
           --enable-static --disable-tui --disable-inprocess-agent \
           --with-gmp=$GITHUB_WORKSPACE/gmp-${{ env.GMP_VERSION }}/build  \
-          --with-mpfr=$GITHUB_WORKSPACE/mpfr-${{ env.MPFR_VERSON }}/build \
+          --with-mpfr=$GITHUB_WORKSPACE/mpfr-${{ env.MPFR_VERSION }}/build \
           --prefix=$GITHUB_WORKSPACE/gdb-${{ env.GDB_VERSION }}/build
 
         make -j"$(nproc)"
