@@ -72,8 +72,9 @@ jobs:
         tar -xf gdb-${{ env.GDB_VERSION }}.tar.gz
         cd gdb-${{ env.GDB_VERSION }}
 
-        CFLAGS="-static" CXXFLAGS="-static" LDFLAGS="-static" ./configure \
+        ./configure \
           --host=${{ matrix.gdbserver_host }} \
+          --enable-static --disable-tui --disable-inprocess-agent \
           --with-gmp=$GITHUB_WORKSPACE/gmp-${{ env.GMP_VERSION }}/build  \
           --with-mpfr=$GITHUB_WORKSPACE/mpfr-${{ env.MPFR_VERSION }}/build \
           --prefix=$GITHUB_WORKSPACE/gdb-${{ env.GDB_VERSION }}/build
