@@ -1,0 +1,95 @@
+name: Build gdbserver
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+env:
+  GDB_VERSION: "17.1"
+  GMP_VERSION: "6.3.0"
+  MPFR_VERSON: "4.2.2"
+
+jobs:
+  build:
+    name: gdbserver (${{ matrix.architecture  }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - architecture: x86_64
+            gdbserver_host: "x86_64-linux-gnu"
+            cross_compile_packages: ""
+            cc: gcc
+            cxx: g++
+          - architecture: armv7l
+            gdbserver_host: "arm-linux-gnueabihf"
+            cross_compile_packages: "gcc-arm-linux-gnueabihf g++-arm-linux-gnueabihf libc6-dev-armhf-cross"
+            cc: arm-linux-gnueabihf-gcc
+            cxx: arm-linux-gnueabihf-g++
+
+    steps:
+    - name: Checkout repository
+      uses: actions/checkout@v4
+
+    - name: Install dependencies
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential ${{ matrix.cross_compile_packages }}
+
+    - name: Build gdbserver and its dependencies from source
+      run: |
+        export CC=${{ matrix.cc }}
+        export CXX=${{ matrix.cxx }}
+      
+        wget https://ftp.gnu.org/gnu/gmp/gmp-${{ env.GMP_VERSION }}.tar.gz
+        tar -xf gmp-${{ env.GMP_VERSION }}.tar.gz
+        cd gmp-${{ env.GMP_VERSION }}
+        ./configure \
+            --host=${{ matrix.gdbserver_host }} --enable-cxx \
+            --prefix=$GITHUB_WORKSPACE/gmp-${{ env.GMP_VERSION }}/build
+        make -j"$(nproc)"
+        make install
+        cd ..
+        
+        wget https://ftp.gnu.org/gnu/mpfr/mpfr-${{ env.MPFR_VERSON }}.tar.gz
+        tar -xf mpfr-${{ env.MPFR_VERSON }}.tar.gz
+        cd mpfr-${{ env.MPFR_VERSON }}
+        ./configure \
+            --host=${{ matrix.gdbserver_host }} \
+            --with-gmp=$GITHUB_WORKSPACE/gmp-${{ env.GMP_VERSION }}/build  \
+            --prefix=$GITHUB_WORKSPACE/mpfr-${{ env.MPFR_VERSON }}/build
+        make -j"$(nproc)"
+        make install
+        cd ..
+
+        wget https://ftp.gnu.org/gnu/gdb/gdb-${{ env.GDB_VERSION }}.tar.gz
+        tar -xf gdb-${{ env.GDB_VERSION }}.tar.gz
+        cd gdb-${{ env.GDB_VERSION }}
+
+        ./configure \
+          --host=${{ matrix.gdbserver_host }} \
+          --with-gmp=$GITHUB_WORKSPACE/gmp-${{ env.GMP_VERSION }}/build  \
+          --with-mpfr=$GITHUB_WORKSPACE/mpfr-${{ env.MPFR_VERSON }}/build \
+          --prefix=$GITHUB_WORKSPACE/gdb-${{ env.GDB_VERSION }}/build
+
+        make -j"$(nproc)"
+        make install
+        cd ..
+
+    - name: Verify binary
+      run: |
+        echo "Checking built artifacts:"
+        
+        ls -la $GITHUB_WORKSPACE/gdb-${{ env.GDB_VERSION }}/build/bin
+        
+        file $GITHUB_WORKSPACE/gdb-${{ env.GDB_VERSION }}/build/bin/gdbserver
+
+    - name: Upload gdbserver artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: gdbserver-${{ env.GDB_VERSION }}-linux-${{ matrix.architecture }}
+        path: ${{ github.workspace }}/gdb-${{ env.GDB_VERSION }}/build/bin
