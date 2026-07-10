@@ -49,7 +49,8 @@ jobs:
         tar -xf gmp-${{ env.GMP_VERSION }}.tar.gz
         cd gmp-${{ env.GMP_VERSION }}
         ./configure \
-            --host=${{ matrix.gdbserver_host }} --enable-static --disable-shared \
+            --host=${{ matrix.gdbserver_host }} \
+            --enable-static --disable-shared \
             --prefix=$GITHUB_WORKSPACE/gmp-${{ env.GMP_VERSION }}/build
         make -j"$(nproc)"
         make install
@@ -59,7 +60,8 @@ jobs:
         tar -xf mpfr-${{ env.MPFR_VERSON }}.tar.gz
         cd mpfr-${{ env.MPFR_VERSON }}
         ./configure \
-            --host=${{ matrix.gdbserver_host }} --enable-static --disable-shared \
+            --host=${{ matrix.gdbserver_host }} \
+            --enable-static --disable-shared \
             --with-gmp=$GITHUB_WORKSPACE/gmp-${{ env.GMP_VERSION }}/build  \
             --prefix=$GITHUB_WORKSPACE/mpfr-${{ env.MPFR_VERSON }}/build
         make -j"$(nproc)"
@@ -72,7 +74,7 @@ jobs:
 
         ./configure \
           --host=${{ matrix.gdbserver_host }} \
-          --enable-static --disable-shared \
+          --enable-static --disable-tui --disable-inprocess-agent \
           --with-gmp=$GITHUB_WORKSPACE/gmp-${{ env.GMP_VERSION }}/build  \
           --with-mpfr=$GITHUB_WORKSPACE/mpfr-${{ env.MPFR_VERSON }}/build \
           --prefix=$GITHUB_WORKSPACE/gdb-${{ env.GDB_VERSION }}/build
