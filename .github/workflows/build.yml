@@ -93,6 +93,9 @@ jobs:
           make -j"$(nproc)"
           make install-strip
           cd ..
+          
+          patchelf --set-interpreter /usr/lib/ld-linux-x86-64.so.2 $GITHUB_WORKSPACE/gdb-${{ env.GDB_VERSION }}/build/bin/gdb
+          patchelf --set-interpreter /usr/lib/ld-linux-x86-64.so.2 $GITHUB_WORKSPACE/gdb-${{ env.GDB_VERSION }}/build/bin/gdbserver
 
       - name: Verify binary
         run: |
